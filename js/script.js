@@ -42,11 +42,11 @@ $(document).ready(() => {
 
     $('#submitWord').click(submitWord);
     $('#resetBoard').click(resetBoard);
-    $('#newTiles').click(getNewTimes);
+    $('#newTiles').click(getNewTiles);
   });
 
   function initializeGame() {
-    laodScrabblePieces();
+    loadScrabblePieces();
     loadDroppableTargets();
   }
 
@@ -107,67 +107,71 @@ $(document).ready(() => {
   }
   
   function loadScrabblePieces() {
-    const baseUrl = "graphics_data/Scrabble_Tile_";
-  
+    const baseUrl = "graphics_data/Scrabble_Tiles/Scrabble_Tile_";
+    $("#rackTiles").empty(); // Clear any existing tiles
+
     for (let i = 0; i < 7; i++) {
-      let randomNum;
-      let letter;
-  
-      do {
-        randomNum = getRandomInt(0, scrabblePieces.length - 1);
-        letter = scrabblePieces[randomNum].letter;
-      } while (scrabblePieces[randomNum].amount === 0);
-  
-      scrabblePieces[randomNum].amount--;
-  
-      const pieceHtml = `<img class="tile" id="tile${i}" src="${baseUrl}${letter}.jpg" alt="${letter}">`;
-      $("#rackTiles").append(pieceHtml);
-  
-      $(`#tile${i}`).css({
-        "position": "absolute",
-        "left": (50 * i) + "px",
-        "top": "0px"
-      }).draggable();
-  
-      gameTiles[i].letter = letter;
+        let randomNum;
+        let letter;
+
+        do {
+            randomNum = getRandomInt(0, scrabblePieces.length - 1);
+            letter = scrabblePieces[randomNum].letter;
+        } while (scrabblePieces[randomNum].amount === 0);
+
+        scrabblePieces[randomNum].amount--;
+
+        const pieceHtml = `<img class="tile" id="tile${i}" src="${baseUrl}${letter}.jpg" alt="${letter}">`;
+        $("#rackTiles").append(pieceHtml);
+
+        $(`#tile${i}`).css({
+            "width": "70px",
+            "height": "100%"
+        }).draggable();
+
+        gameTiles[i].letter = letter;
     }
-  }
+}
+
   
   function loadDroppableTargets() {
-    const imgUrl = "graohics_data/Scrabble_Blank.png";
+    const imgUrl = "graphics_data/Scrabble_Blank.png";
     
-    // for (let i = 0; i < 15; i++) {
-    const dropHtml = `<img class="droppable" id="drop${i}" src="${imgUrl}" alt="Drop Zone">`;
-    $("#scrabbleBoard").append(dropHtml);
-  
-      $(`#drop${i}`).css({
-        
-      }).droppable({
-        drop: function (event, ui) {
-          const draggableId = ui.draggable.attr("id");
-          const droppableId = $(this).attr("id");
-  
-          console.log(`Tile: ${draggableId} - dropped on ${droppableId}`);
-  
-          gameBoard[findBoardPosition(droppableId)].tile = draggableId;
-          findWord();
-        },
-        out: function (event, ui) {
-          const draggableId = ui.draggable.attr("id");
-          const droppableId = $(this).attr("id");
-  
-          if (draggableId !== gameBoard[findBoardPosition(droppableId)].tile) {
-            console.log("FALSE ALARM DETECTED.");
-            return;
-          }
-  
-          console.log(`Tile: ${draggableId} - removed from ${droppableId}`);
-          gameBoard[findBoardPosition(droppableId)].tile = "tileX";
-          findWord();
-        }
-      });
-    // }
-  }
+    for (let i = 0; i < 15; i++) { // Correct the loop
+        const dropHtml = `<img class="droppable" id="drop${i}" src="${imgUrl}" alt="Drop Zone">`;
+        $("#scrabbleBoard").append(dropHtml);
+
+        $(`#drop${i}`).css({
+            "position": "relative",
+            "left": 0,
+            "top": -125 + "px"
+        }).droppable({
+            drop: function (event, ui) {
+                const draggableId = ui.draggable.attr("id");
+                const droppableId = $(this).attr("id");
+
+                console.log(`Tile: ${draggableId} - dropped on ${droppableId}`);
+
+                gameBoard[findBoardPosition(droppableId)].tile = draggableId;
+                findWord();
+            },
+            out: function (event, ui) {
+                const draggableId = ui.draggable.attr("id");
+                const droppableId = $(this).attr("id");
+
+                if (draggableId !== gameBoard[findBoardPosition(droppableId)].tile) {
+                    console.log("FALSE ALARM DETECTED.");
+                    return;
+                }
+
+                console.log(`Tile: ${draggableId} - removed from ${droppableId}`);
+                gameBoard[findBoardPosition(droppableId)].tile = "tileX";
+                findWord();
+            }
+        });
+    }
+}
+
   
   function submitWord() {
     // Functionality to submit the word
