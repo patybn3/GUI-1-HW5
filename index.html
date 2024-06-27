@@ -47,11 +47,57 @@
         </div>
     </div>
 
-     <!-- jQuery and jQuery UI -->
-     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-     <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
-     <!-- JavaScript scripts -->
-     <script src="graphics_data/Scrabble_Pieces_AssociativeArray_Jesse.js"></script>
-     <script src="script/script.js"></script>
+    <div class="container" id="play">
+        <h2>Play Scrabble</h2>
+        <div id="scoreBoard">
+            <h3>Score: <span id="score">0</span></h3>
+        </div>
+        <div id="scrabbleBoard" class="board" droppable="true">
+            <img src="graphics_data/Scrabble_Board_OneLine.png" alt="Scrabble board" class="boardImage">
+        </div>
+        <div id="tileRack">
+            <img id="tileImg" src="graphics_data/scrabble-tile-holder-406774_640.png" alt="Tile Rack">
+            <div id="rackTiles"></div>
+        </div>
+        <div id="controls">
+            <button id="submitWord" class="btn btn-success">Submit Word</button>
+            <button id="resetBoard" class="btn btn-success">Reset Game</button>
+            <button id="newTiles" class="btn btn-success">Get New Tiles</button>
+        </div>
+        <div id="wordValidation">
+            <h3>Word Status: <span id="validationMessage"></span></h3>
+            <div>
+                <h4>Submitted Words:</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th id="word">Word</th>
+                            <th>Valid</th>
+                            <th>Word Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submittedWords"></tbody>
+                </table>
+                <h4>Game Summary:</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Number of Valid Words</th>
+                            <th>Number of Invalid Words</th>
+                            <th>Total Game Points</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gameSummary"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and jQuery UI -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <!-- JavaScript scripts -->
+    <script src="graphics_data/Scrabble_Pieces_AssociativeArray_Jesse.js"></script>
+    <script src="script/script.js"></script>
 </body>
 </html>
