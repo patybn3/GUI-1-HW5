@@ -4,6 +4,10 @@
 #### Professor Zhou
 #### Student: Patricia Antlitz
 
+repo: https://github.com/patybn3/GUI-1-HW5
+gh page: https://patybn3.github.io/GUI-1-HW5/
+
+
 #### Disclaimer:
 
 This code is not ready. Since the summer semester is shorter, I believe we were not exposed to these topic enough in order to learn it properly. However, a good portion of the code works:
@@ -48,3 +52,14 @@ The dictionary worked, I used Free Dictionary API https://dictionaryapi.dev/
 ### issues:
 I was not able to make the "double word count" functionality work. 
 The word label behaves strangedly sometimes. Some times it records the words as it should, some times it doesnt.
+
+
+### Next versions:
+
+Include whole board
+
+implement double word count
+
+fix "vord title" bug
+
+add footer
