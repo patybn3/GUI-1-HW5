@@ -1,194 +1,296 @@
-//populate the data from pieces.json
-let scrabblePieces = [];
-let totalScore = 0;
-
-const gameTiles = [
-    { "id": "tile0", "letter": "" },
-    { "id": "tile1", "letter": "" },
-    { "id": "tile2", "letter": "" },
-    { "id": "tile3", "letter": "" },
-    { "id": "tile4", "letter": "" },
-    { "id": "tile5", "letter": "" },
-    { "id": "tile6", "letter": "" }
-  ];
-  
-  const gameBoard = [
-    { "id": "drop0", "tile": "tileX" },
-    { "id": "drop1", "tile": "tileX" },
-    { "id": "drop2", "tile": "tileX" },
-    { "id": "drop3", "tile": "tileX" },
-    { "id": "drop4", "tile": "tileX" },
-    { "id": "drop5", "tile": "tileX" },
-    { "id": "drop6", "tile": "tileX" },
-    { "id": "drop7", "tile": "tileX" },
-    { "id": "drop8", "tile": "tileX" },
-    { "id": "drop9", "tile": "tileX" },
-    { "id": "drop10", "tile": "tileX" },
-    { "id": "drop11", "tile": "tileX" },
-    { "id": "drop12", "tile": "tileX" },
-    { "id": "drop13", "tile": "tileX" },
-    { "id": "drop14", "tile": "tileX" }
-  ];
-
 $(document).ready(() => {
+    let scrabblePieces = [];
+    let droppedTiles = [];
+    let submittedWords = [];
+    let validWords = 0;
+    let invalidWords = 0;
+    let totalScore = 0;
+    let score = 0;
+
+    const gameTiles = [
+        { "id": "tile0", "letter": "" },
+        { "id": "tile1", "letter": "" },
+        { "id": "tile2", "letter": "" },
+        { "id": "tile3", "letter": "" },
+        { "id": "tile4", "letter": "" },
+        { "id": "tile5", "letter": "" },
+        { "id": "tile6", "letter": "" }
+    ];
+
+    const gameBoard = [
+        { "id": "drop0", "tile": "tileX" },
+        { "id": "drop1", "tile": "tileX" },
+        { "id": "drop2", "tile": "tileX" },
+        { "id": "drop3", "tile": "tileX" },
+        { "id": "drop4", "tile": "tileX" },
+        { "id": "drop5", "tile": "tileX" },
+        { "id": "drop6", "tile": "tileX" },
+        { "id": "drop7", "tile": "tileX" },
+        { "id": "drop8", "tile": "tileX" },
+        { "id": "drop9", "tile": "tileX" },
+        { "id": "drop10", "tile": "tileX" },
+        { "id": "drop11", "tile": "tileX" },
+        { "id": "drop12", "tile": "tileX" },
+        { "id": "drop13", "tile": "tileX" },
+        { "id": "drop14", "tile": "tileX" }
+    ];
+
     // Load scrabble pieces data from JSON file
     $.getJSON("graphics_data/pieces.json", (data) => {
-      console.log("Loading scrabble pieces data...");
-      scrabblePieces = data.pieces;
-      initializeGame();
+        console.log("Loading scrabble pieces data...");
+        scrabblePieces = data.pieces;
+        initializeGame();
     }).fail(() => {
-      console.error("Failed to load scrabble pieces data from JSON.");
+        console.error("Failed to load scrabble pieces data from JSON.");
     });
 
-    $('#submitWord').click(submitWord);
+    // Button handlers
+    $('#submitWord').click(handleWordSubmission);
     $('#resetBoard').click(resetBoard);
     $('#newTiles').click(getNewTiles);
-  });
 
-  function initializeGame() {
-    loadScrabblePieces();
-    loadDroppableTargets();
-  }
-
-  function findWord() {
-    let word = "";
-    let wordScore = 0;
-    let doubleWordScore = false;
-  
-    gameBoard.forEach((slot, index) => {
-      if (slot.tile !== "tileX") {
-        const letter = findLetter(slot.tile);
-        word += letter;
-        let letterScore = findScore(slot.tile);
-  
-        // Check if the tile is on a double letter score
-        if (index === 2 || index === 8) {
-          letterScore *= 2;
-        }
-  
-        wordScore += letterScore;
-  
-        // Check if the tile is on a double word score
-        if (index === 6 || index === 12) {
-          doubleWordScore = true;
-        }
-      }
-    });
-  
-    // Apply double word score if applicable
-    if (doubleWordScore) {
-      wordScore *= 2;
+    function initializeGame() {
+        loadScrabblePieces();
+        loadDroppableTargets();
     }
-  
-    // Update total score and display it
-    totalScore += wordScore;
-    $("#score").html(totalScore);
-    $("#validationMessage").html(word || "____");
-  }
-  
-  function findScore(tileId) {
-    const letter = findLetter(tileId);
-    const piece = scrabblePieces.find(piece => piece.letter === letter);
-    return piece ? piece.value : 0;
-  }
-  
-  function findLetter(tileId) {
-    const tile = gameTiles.find(tile => tile.id === tileId);
-    return tile ? tile.letter : "";
-  }
-  
-  function findBoardPosition(dropId) {
-    return gameBoard.findIndex(slot => slot.id === dropId);
-  }
-  
-  function findTilePosition(tileId) {
-    const slot = gameBoard.find(slot => slot.tile === tileId);
-    return slot ? slot.id : -1;
-  }
-  
-  function loadScrabblePieces() {
-    const baseUrl = "graphics_data/Scrabble_Tiles/Scrabble_Tile_";
-    $("#rackTiles").empty(); // Clear any existing tiles
 
-    for (let i = 0; i < 7; i++) {
-        let randomNum;
-        let letter;
+    function loadScrabblePieces() {
+        const baseUrl = "graphics_data/Scrabble_Tiles/Scrabble_Tile_";
+        $("#rackTiles").empty(); // Clear any existing tiles
 
-        do {
-            randomNum = getRandomInt(0, scrabblePieces.length - 1);
-            letter = scrabblePieces[randomNum].letter;
-        } while (scrabblePieces[randomNum].amount === 0);
+        for (let i = 0; i < 7; i++) {
+            let randomNum;
+            let letter;
 
-        scrabblePieces[randomNum].amount--;
+            do {
+                randomNum = getRandomInt(0, scrabblePieces.length - 1);
+                letter = scrabblePieces[randomNum].letter;
+            } while (scrabblePieces[randomNum].amount === 0);
 
-        const pieceHtml = `<img class="tile" id="tile${i}" src="${baseUrl}${letter}.jpg" alt="${letter}">`;
-        $("#rackTiles").append(pieceHtml);
+            scrabblePieces[randomNum].amount--;
 
-        $(`#tile${i}`).css({
-            "width": "70px",
-            "height": "100%"
-        }).draggable();
+            const pieceHtml = `<img class="tile" id="tile${i}" src="${baseUrl}${letter}.jpg" alt="${letter}">`;
+            $("#rackTiles").append(pieceHtml);
 
-        gameTiles[i].letter = letter;
+            $(`#tile${i}`).css({
+                "width": "70px",
+                "height": "100%"
+            }).draggable();
+
+            gameTiles[i].letter = letter;
+        }
     }
-}
 
-  
-  function loadDroppableTargets() {
-    const imgUrl = "graphics_data/Scrabble_Blank.png";
-    
-    for (let i = 0; i < 15; i++) { // Correct the loop
-        const dropHtml = `<img class="droppable" id="drop${i}" src="${imgUrl}" alt="Drop Zone">`;
-        $("#scrabbleBoard").append(dropHtml);
+    function loadDroppableTargets() {
+        const imgUrl = "graphics_data/Scrabble_Blank.png";
+        
+        for (let i = 0; i < 15; i++) {
+            const dropHtml = `<img class="droppable" id="drop${i}" src="${imgUrl}" alt="Drop Zone">`;
+            $("#scrabbleBoard").append(dropHtml);
 
-        $(`#drop${i}`).css({
-            "position": "relative",
-            "left": 0,
-            "top": -125 + "px"
-        }).droppable({
-            drop: function (event, ui) {
-                const draggableId = ui.draggable.attr("id");
-                const droppableId = $(this).attr("id");
+            $(`#drop${i}`).css({
+                "position": "relative",
+                "left": 0,
+                "top": -125 + "px"
+            }).droppable({
+                drop: function (event, ui) {
+                    const draggableId = ui.draggable.attr("id");
+                    const droppableId = $(this).attr("id");
 
-                console.log(`Tile: ${draggableId} - dropped on ${droppableId}`);
+                    console.log(`Tile: ${draggableId} - dropped on ${droppableId}`);
 
-                gameBoard[findBoardPosition(droppableId)].tile = draggableId;
-                findWord();
-            },
-            out: function (event, ui) {
-                const draggableId = ui.draggable.attr("id");
-                const droppableId = $(this).attr("id");
+                    gameBoard[findBoardPosition(droppableId)].tile = draggableId;
+                    findWord();
+                    droppedTiles.push({ id: draggableId, letter: findLetter(draggableId), value: findScore(draggableId) });
+                    updateScore();
+                },
+                out: function (event, ui) {
+                    const draggableId = ui.draggable.attr("id");
+                    const droppableId = $(this).attr("id");
 
-                if (draggableId !== gameBoard[findBoardPosition(droppableId)].tile) {
-                    console.log("FALSE ALARM DETECTED.");
-                    return;
+                    if (draggableId !== gameBoard[findBoardPosition(droppableId)].tile) {
+                        console.log("FALSE ALARM DETECTED.");
+                        return;
+                    }
+
+                    console.log(`Tile: ${draggableId} - removed from ${droppableId}`);
+                    gameBoard[findBoardPosition(droppableId)].tile = "tileX";
+                    droppedTiles = droppedTiles.filter(tile => tile.id !== draggableId);
+                    findWord();
+                    updateScore();
                 }
+            });
+        }
+    }
 
-                console.log(`Tile: ${draggableId} - removed from ${droppableId}`);
-                gameBoard[findBoardPosition(droppableId)].tile = "tileX";
-                findWord();
+    function findLetter(tileId) {
+        for (var i = 0; i < 7; i++) {
+            if (gameTiles[i].id == tileId) {
+                return gameTiles[i].letter;
             }
+        }
+        return -1;
+    }
+
+    function findBoardPosition(tileId) {
+        for (let i = 0; i < 15; i++) {
+            if (gameBoard[i].id == tileId) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    function findTilePosition(tileId) {
+        for (let i = 0; i < 15; i++) {
+            if (gameBoard[i].tile == tileId) {
+                return gameBoard[i].id;
+            }
+        }
+        return -1;
+    }
+
+    function findScore(tileId) {
+        let letter = findLetter(tileId);
+        let score = 0;
+
+        for (let i = 0; i < scrabblePieces.length; i++) {
+            let obj = scrabblePieces[i];
+
+            if (obj.letter == letter) {
+                score = obj.value;
+
+                score += (score * doubleLetter(tileId));
+                return score;
+            }
+        }
+        return 0; // Return 0 instead of -1 for better score calculation
+    }
+
+    function doubleLetter(tileId) {
+        let dropID = findTilePosition(tileId);
+
+        if (dropID == "drop6" || dropID == "drop8") {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    function shouldDouble() {
+        if (gameBoard[2].tile != "tileX") {
+            return 1;
+        }
+        if (gameBoard[12].tile != "tileX") {
+            return 1;
+        }
+        return 0;
+    }
+
+    function findWord() {
+        let word = "";
+        for (let i = 0; i < 15; i++) {
+            if (gameBoard[i].tile !== "tileX") {
+                word += findLetter(gameBoard[i].tile);
+            }
+        }
+        $("#validationMessage").html(word || "____");
+    }
+
+    function calculateScore() {
+        let wordScore = 0;
+        droppedTiles.forEach(tile => {
+            wordScore += tile.value;
+        });
+        return wordScore;
+    }
+
+    function updateScore() {
+        score = calculateScore();
+        $("#score").text(score);
+    }
+
+    function validateWord(word) {
+        // Use a more comprehensive dictionary or a placeholder function
+        const dictionary = ["apple", "banana", "cat", "dog", "elephant", "frog", "goat", "hippo", "ice", "juice", "joy"]; // Example words
+        return dictionary.includes(word.toLowerCase());
+    }
+
+    function handleWordSubmission() {
+        const word = droppedTiles.map(tile => tile.letter).join('');
+        const isValid = validateWord(word);
+        const wordScore = calculateScore();
+
+        $("#validationMessage").text(isValid ? "Valid Word" : "Invalid Word");
+
+        submittedWords.push({ word, isValid, score: wordScore });
+        updateSubmittedWordsTable();
+
+        if (isValid) {
+            validWords++;
+            totalScore += wordScore;
+        } else {
+            invalidWords++;
+        }
+
+        updateGameSummaryTable();
+        clearBoard();
+        loadScrabblePieces(); // Changed from createTileRack to loadScrabblePieces
+    }
+
+    function updateSubmittedWordsTable() {
+        const tableBody = $("#submittedWords");
+        tableBody.empty();
+
+        submittedWords.forEach(entry => {
+            const row = $("<tr>");
+            row.append($("<td>").text(entry.word));
+            row.append($("<td>").text(entry.isValid ? "Yes" : "No"));
+            row.append($("<td>").text(entry.score));
+            tableBody.append(row);
         });
     }
-}
 
-  
-  function submitWord() {
-    // Functionality to submit the word
-    console.log("Word submitted");
-  }
-  
-  function resetBoard() {
-    // Functionality to reset the board
-    console.log("Board reset");
-  }
-  
-  function getNewTiles() {
-    // Functionality to get new tiles
-    console.log("New tiles generated");
-  }
-  
-  function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-  
+    function updateGameSummaryTable() {
+        const summaryBody = $("#gameSummary");
+        summaryBody.empty();
+
+        const row = $("<tr>");
+        row.append($("<td>").text(validWords));
+        row.append($("<td>").text(invalidWords));
+        row.append($("<td>").text(totalScore));
+        summaryBody.append(row);
+    }
+
+    function clearBoard() {
+        droppedTiles = [];
+        $(".board .tile").remove();
+        updateScore();
+        resetValidationMessage();
+    }
+
+    function resetValidationMessage() {
+        $("#validationMessage").text('');
+    }
+
+    function getNewTiles() {
+        loadScrabblePieces();
+        droppedTiles = [];
+        clearBoard();
+    }
+
+    function resetBoard() {
+        clearBoard();
+        submittedWords = [];
+        validWords = 0;
+        invalidWords = 0;
+        totalScore = 0;
+        loadScrabblePieces();
+        updateSubmittedWordsTable();
+        updateGameSummaryTable();
+    }
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+});
