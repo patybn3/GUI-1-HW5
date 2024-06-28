@@ -177,33 +177,36 @@ $(document).ready(() => {
         return 0;
     }
 
-    function shouldDouble() {
-        if (gameBoard[2].tile != "tileX") {
-            return 1;
-        }
-        if (gameBoard[12].tile != "tileX") {
-            return 1;
-        }
-        return 0;
-    }
-
     function findWord() {
         let word = "";
         for (let i = 0; i < 15; i++) {
-            if (gameBoard[i].tile !== "tileX") {
+            if (gameBoard[i].tile != "tileX") {
                 word += findLetter(gameBoard[i].tile);
             }
         }
+
         $("#validationMessage").html(word || "____");
     }
 
     function calculateScore() {
         let wordScore = 0;
+        let isDoubleWordScore = false; // Flag to track if we need to double the score
+    
         droppedTiles.forEach(tile => {
             wordScore += tile.value;
+    
+            // Check if the tile is on a double word score position (2 or 12)
+            if (tile.boardPosition === 2 || tile.boardPosition === 12) {
+                isDoubleWordScore = true;
+            }
         });
+        // Apply the double word score if applicable
+        if (isDoubleWordScore) {
+            wordScore *= 2;
+        }
+    
         return wordScore;
-    }
+    }    
 
     function updateScore() {
         score = calculateScore();
@@ -211,18 +214,27 @@ $(document).ready(() => {
     }
 
     function validateWord(word) {
-        // Use a more comprehensive dictionary or a placeholder function
-        const dictionary = ["apple", "banana", "cat", "dog", "elephant", "frog", "goat", "hippo", "ice", "juice", "joy"]; // Example words
-        return dictionary.includes(word.toLowerCase());
+        return $.ajax({
+            url: `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
+            method: 'GET'
+        }).then(function() {
+            return true; // The word exists
+        }).catch(function() {
+            return false; // The word does not exist
+        });
     }
+    
+// Function to handle word submission
+function handleWordSubmission() {
+    const word = droppedTiles.map(tile => tile.letter).join('');
 
-    function handleWordSubmission() {
-        const word = droppedTiles.map(tile => tile.letter).join('');
-        const isValid = validateWord(word);
-        const wordScore = calculateScore();
+    // Validate the word using the online dictionary
+    validateWord(word).then(isValid => {
+        let wordScore = calculateScore();
 
         $("#validationMessage").text(isValid ? "Valid Word" : "Invalid Word");
 
+        // Record the word submission
         submittedWords.push({ word, isValid, score: wordScore });
         updateSubmittedWordsTable();
 
@@ -235,8 +247,10 @@ $(document).ready(() => {
 
         updateGameSummaryTable();
         clearBoard();
-        loadScrabblePieces(); // Changed from createTileRack to loadScrabblePieces
-    }
+        loadScrabblePieces(); // Load new tiles for the next turn
+    });
+}
+   
 
     function updateSubmittedWordsTable() {
         const tableBody = $("#submittedWords");
