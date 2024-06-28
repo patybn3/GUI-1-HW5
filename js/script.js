@@ -1,3 +1,18 @@
+/**
+ * 
+ * @assigment Homework 5 GUI 1 - UML
+ * Professor: Wenjin Zhou, UMass Lowell Computer Science, wenjin_zhou@uml.edu - Summer 1 2024
+ * @file script.js
+ * @description This is a scrabble game
+ * @version
+ * @date start 2024-06-28
+ * @author Patricia Antlitz
+ * @version 1.0
+ * 
+ * Copyright (c) 2024 by Patricia Antlitz
+ * 
+ */
+
 $(document).ready(() => {
     let scrabblePieces = [];
     let droppedTiles = [];
@@ -195,6 +210,7 @@ $(document).ready(() => {
         droppedTiles.forEach(tile => {
             wordScore += tile.value;
     
+            // doesnt work
             // Check if the tile is on a double word score position (2 or 12)
             if (tile.boardPosition === 2 || tile.boardPosition === 12) {
                 isDoubleWordScore = true;
